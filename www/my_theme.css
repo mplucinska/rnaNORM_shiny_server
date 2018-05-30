@@ -1,0 +1,92 @@
+.btn-secondary {
+  color: #222;
+  background-color: #eee;
+  border-color: #dbdbdb;
+}
+
+.btn-secondary:hover {
+  color: #222;
+  background-color: #dbdbdb;
+  border-color: #d5d4d4;
+}
+
+.shiny-input-container:not(.shiny-input-container-inline) {
+                    width: 100%;
+                    }
+.main-container {
+                    max-width: 1500px;
+                    margin-left: auto;
+                    margin-right: auto;
+                    padding-top: 70px;
+                    padding-bottom: 70px;
+
+}
+.textareainput{
+                font-family: Open Sans, monospace;
+                    }
+.panel-border-primary{
+    border-color: #008cba;
+    border-width: 2px;
+ }      
+
+
+.view_str{
+  border-width: 10px;
+  border-color: #888;
+
+}
+.panel-title{
+  font-size: 2;
+}
+.border-primary {
+  border-color: #008cba;
+}
+
+.list-group-item{
+  border-width: 0;
+  border-color: #FFFFFF;
+}
+
+.js-plotly-plot .plotly .modebar {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    z-index: 1001;
+    background: rgba(255, 255, 255, 0.7);
+}  
+
+.js-plotly-plot .plotly .modebar-group {
+    box-sizing: border-box;
+    margin-left: 8px;
+    position: relative;
+    vertical-align: right;
+    white-space: nowrap;
+}
+
+.js-plotly-plot .plotly .modebar-btn {
+    position: relative;
+    font-size: 16px;
+    cursor: pointer;
+    line-height: normal;
+    box-sizing: border-box;
+    padding: 3px 4px;
+}
+
+.modebar {
+      width: 150px;
+      height:30px;
+}
+
+.modebar-group {
+      width:20px;
+}
+
+.modebar-btn {
+     float: right; 
+}
+
+.main-svg {
+    left: 5;
+    }
+
+ 
