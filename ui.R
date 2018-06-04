@@ -94,11 +94,11 @@ shinyUI(
                                     hr(),  
                                     div(class="text-primary",
                                     uiOutput("selectID")),
-                                    br(),
-                                    textOutput("maxy"),
-                                    br(),
+                                    span(textOutput("maxy"),style="color:white"),
                                     conditionalPanel(condition = "output.maxy != 0",
-                                                     
+                                      br(),
+                                      textOutput("maxy2"),
+                                      br(),
                                       fluidRow(
                                         column(11,
                                                h5(strong("Normalized reactivities calculated with rnaPRE"))),
@@ -145,11 +145,11 @@ shinyUI(
                                       )
                                     ),# conditional maxy > 0
                                     conditionalPanel(condition = "output.maxy == 0",
-                                        #fluidRow(
-                                        #  column( 3 ,bsAlert("alert"))
-                                        #)
-                                        div(class="breadcrumb", h5("Choose another transcript. Not enough positions with stops to calculate reactivity."))
-                                        
+                                        fluidRow(
+                                          column(3, ""),
+                                          column(6, div(class="breadcrumb", h5("Choose another transcript. Not enough positions with stops to calculate reactivity."))),
+                                          column(3, "")
+                                          )
                                     ) #conditionsl maxy == 0
                    )# results panel rnaPRE end
                )
@@ -232,11 +232,32 @@ shinyUI(
       tabPanel("Help",
                div(class = "container-fluid main-container",
                h4(strong("About rnaNORM"), class = "text-muted"),
-               hr(),
+               #hr(),
+               #h5("rnaNORM is method reactivity calculation that eliminate read distribution bias and prevent underestimation of reactivity."),
+               br(),
                h5(strong("Input format"), class = "text-primary"),
                hr(),
+               h5("Input consist of 4 tab delimited columns (default order):"),
+               br(),
+               fluidRow(
+                 column(1,"id"),
+                 column(1, "position"),
+                 column(2, "number_of_stops_in_control"),
+                 column(2, "number_of_stops_in_modified")
+               ),                 
+               br(),
+               h5("User can also specify column order in file."),
+               br(),
+               h5("example"),
+               fluidRow(column(1,"tL(UAA)B1"), column(1,"28"), column(1,"35"), column(1, "13")),
+               fluidRow(column(1,"tL(UAA)B1"), column(1,"29"), column(1,"14"), column(1, "7")),
+               fluidRow(column(1,"tL(UAA)B1"), column(1,"30"), column(1,"15"), column(1, "7")),
+               fluidRow(column(1,"tL(UAA)B1"), column(1,"31"), column(1,"96"), column(1, "50")),
+               fluidRow(column(1,"tL(UAA)B1"), column(1,"32"), column(1,"99"), column(1, "71")),
+               br(),
                h5(strong("Output"), class ="text-primary"),
                hr(),
+               h6(),
                h5(strong("Download from github"), class = "text-primary"),
                hr()
                )

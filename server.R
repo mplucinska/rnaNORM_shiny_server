@@ -107,6 +107,7 @@ shinyServer(function(input, output, session) {
                                         "\t", escape_double = FALSE, col_names = FALSE,  trim_ws = TRUE)
     system('rm www/working_dir/output_file_rnaPRE.txt')
     maxy <- read_delim("maxy.txt","\t", escape_double = FALSE, col_names = FALSE,  trim_ws = TRUE)
+    output$maxy2 <- renderText(as.numeric(maxy[1,1]))
     system('rm maxy.txt')
     output$maxy <- renderText(as.numeric(maxy[1,1]))
     if(maxy == '0') {
