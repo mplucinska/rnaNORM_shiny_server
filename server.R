@@ -2,7 +2,7 @@ library(ggplot2)
 library(ggthemes)  
 library(shiny)
 library(plotly)
-library(R4RNA)
+#library(R4RNA)
 library(DT)
 
 shinyServer(function(input, output, session) {
@@ -106,9 +106,9 @@ shinyServer(function(input, output, session) {
     normalized_all_data <- read_delim("www/working_dir/output_file_rnaPRE.txt",
                                         "\t", escape_double = FALSE, col_names = FALSE,  trim_ws = TRUE)
     system('rm www/working_dir/output_file_rnaPRE.txt')
-    maxy <- read_delim("maxy.txt","\t", escape_double = FALSE, col_names = FALSE,  trim_ws = TRUE)
+    maxy <- read_delim("www/working_dir/maxy.txt","\t", escape_double = FALSE, col_names = FALSE,  trim_ws = TRUE)
     output$maxy2 <- renderText(as.numeric(maxy[1,1]))
-    system('rm maxy.txt')
+    system('rm www/working_dir/maxy.txt')
     output$maxy <- renderText(as.numeric(maxy[1,1]))
     if(maxy == '0') {
       createAlert(session, "alert", "exampleAlert", title = "Oops",

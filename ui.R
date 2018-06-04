@@ -101,7 +101,7 @@ shinyUI(
                                       br(),
                                       fluidRow(
                                         column(11,
-                                               h5(strong("Normalized reactivities calculated with rnaPRE"))),
+                                               h5(strong("Normalized reactivities calculated with rnaNORM"))),
                                         column(1,
                                                bsButton("q1", label = "", icon = icon("question"), style = 'primary',
                                                         size = "extra-small"),
