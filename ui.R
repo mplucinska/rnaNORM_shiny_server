@@ -8,9 +8,9 @@ library(shiny)
 library(shinythemes)
 library(shinyBS)
 
-
 shinyUI(
   fluidPage(
+    useShinyjs(),
     navbarPage(theme = shinytheme("yeti"), "rna", position = "fixed-top", collapsible = TRUE,
       fluid = TRUE,
       header=singleton(tags$head(tags$head(tags$script(src="/scripts/fornac.js")),
@@ -83,10 +83,17 @@ shinyUI(
                    
                    #results panel rnaPRE
                    conditionalPanel(condition = "input.submit_file_norm == '1' || input.submit_form == '1' || input.load_example == '1'",
+                                    span(textOutput("done"),style="color:white"),
                                     fluidRow(
-                                      column(8,h3(strong("rnaNORM"), class = "text-muted")),
-                                      column(1, downloadButton("downloadData", "Download results")), 
-                                      column(1, ""),
+                                      column(6,h3(strong("rnaNORM"), class = "text-muted")),
+                                      column(4,
+                                             downloadButton("downloadData", "Download results for transcript", style='font-size:90%'),
+                                             conditionalPanel(condition = "output.done != 1",
+                                                              actionButton("calculate", "Calculate all", style='font-size:90%')
+                                             ), 
+                                             conditionalPanel(condition = "output.done == 1",
+                                                              downloadButton("download", "Download all", style='font-size:90%'))
+                                             ), 
                                       column(1, actionButton( "new_analysis", "New analysis", class="btn-warning")),
                                       column(1, "")
                                     ),

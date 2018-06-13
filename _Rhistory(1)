@@ -1,3 +1,0 @@
-shiny::runApp()
-getwd()
-runApp()

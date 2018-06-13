@@ -33,13 +33,13 @@ shinyServer(function(input, output, session) {
   #icons to remove from plotly modebar
   list_buttons <- list("autoScale2d" , 'Collaborate', 'toggleSpikelines','lasso2d', 'pan2d', 'sendDataToCloud', 'select2d', 'zoomIn2d', 'zoomOut2d', 'hoverClosestCartesian', 'hoverCompareCartesian')
   
-  
   observeEvent(input$submit_file_norm, {
     df <- read.csv(input$file2$datapath,sep = "\t", header = F)
     state = reactiveValues(choice = unique(df$V1))
     output$selectID <- renderUI({
       selectInput("selected", strong(h5("Select transcript ID:")), state$choice  ,selected = 1)
     })
+    
     observeEvent(input$selected,{
       state$val <- input$selected
       data_selected_1 <- subset(df, df$V1 == state$val)
@@ -76,12 +76,45 @@ shinyServer(function(input, output, session) {
     })
 })
   
+
+  download_all <- function(){
+    output$download <- downloadHandler(
+      filename <- function() {
+        paste("aaaa", "csv", sep=".")
+      },
+      content = function(file){        
+        file.copy("www/working_dir/output_all_rnaPRE.txt", file)
+      }
+    )
+  }
+  
   observeEvent(input$load_example, {
-    df <- read.csv("test_multiple" ,sep = "\t", header = F)
+    output$done <-renderText(0)
+    df <- read.csv("test_multiple" ,sep = "\t", header = F)[1:30000,]
+      
+    #promise for download all data
+    d_all <- future({
+      write.table(df, "www/working_dir/input_all_rnaPRE", row.names = FALSE, col.names = FALSE, quote = FALSE)
+      system('python new_normalization.py -i www/working_dir/input_all_rnaPRE -o www/working_dir/output_all_rnaPRE.txt ')
+      normalized_all_data <- read_delim("www/working_dir/output_all_rnaPRE.txt",
+                                        "\t", escape_double = FALSE, col_names = FALSE,  trim_ws = TRUE)
+    }) %plan% multiprocess
+      
+    observeEvent(input$calculate,{
+      disable("calculate")
+      while(!resolved(d_all)){
+        Sys.sleep(1)
+      }
+      download_all()
+      output$done <- renderText(1)
+      enable("calculate")
+     })
+
     state = reactiveValues(choice = unique(df$V1))
     output$selectID <- renderUI({
       selectInput("selected", h6(strong("Select transcript ID:")), state$choice, selected = 1)
     })
+    
     observeEvent(input$selected,{
       state$val <- input$selected
       data_selected_1 <- subset(df, df$V1 == state$val)
@@ -92,13 +125,18 @@ shinyServer(function(input, output, session) {
       normalized_all_data <- res[1]
       table_res <- res[2]
       draw_plots(normalized_all_data, table_res)
-      #} 
+      #}
+      
     })
-  })  
+    
+
+  })
+
   
   observeEvent(input$new_analysis, {
     session$reload()
   })
+  
   
   rnaPRE_results <- function(df){
     write.table(df, "www/working_dir/input_file_rnaPRE", row.names = FALSE, col.names = FALSE, quote = FALSE)
@@ -106,9 +144,9 @@ shinyServer(function(input, output, session) {
     normalized_all_data <- read_delim("www/working_dir/output_file_rnaPRE.txt",
                                         "\t", escape_double = FALSE, col_names = FALSE,  trim_ws = TRUE)
     system('rm www/working_dir/output_file_rnaPRE.txt')
-    maxy <- read_delim("www/working_dir/maxy.txt","\t", escape_double = FALSE, col_names = FALSE,  trim_ws = TRUE)
+    maxy <- read_delim("www/working_dir/maxy_output_file_rnaPRE.txt","\t", escape_double = FALSE, col_names = FALSE,  trim_ws = TRUE)
     output$maxy2 <- renderText(as.numeric(maxy[1,1]))
-    system('rm www/working_dir/maxy.txt')
+    system('rm www/working_dir/maxy_output_file_rnaPRE.txt')
     output$maxy <- renderText(as.numeric(maxy[1,1]))
     if(maxy == '0') {
       createAlert(session, "alert", "exampleAlert", title = "Oops",
@@ -128,15 +166,17 @@ shinyServer(function(input, output, session) {
   
   draw_plots <- function(ndata, table_res){
     ndata <- as.data.frame(ndata)
+    #download selscted transcript
+    print(unique(ndata$X1))
     output$downloadData <- downloadHandler(
       filename <- function() {
-        paste("www/working_dir/output_rnaPRE", "csv", sep=".")
+        paste(unique(ndata$X1), "csv", sep=".")
       },
-      
       content <- function(file) {
         file.copy("www/working_dir/output_rnaPRE.csv", file)
       }
     )
+    
     output$plot_scatter1 <- renderPlotly({
       p <- plot_ly(ndata, x = ~X3, y = ~X4)
       ggplotly(p) %>% config(displayModeBar = T,   modeBarButtonsToRemove = list_buttons) %>% layout(margin = m, yaxis = list(title = "stops control"),  xaxis = list(title = "stops treated", range = c(0, max(ndata$X3,ndata$X4))),                                                                                                  xaxis = list(title = "")) 

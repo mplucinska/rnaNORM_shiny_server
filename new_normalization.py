@@ -62,7 +62,7 @@ class Transcript:
 		#print density
 		self.norm_c = math.pow(2, self.FC[index])
 		max_y = den[index]
-		f_o = open("www/working_dir/maxy.txt", 'w')
+		f_o = open("www/working_dir/maxy_" + arg.o.split("/")[-1], 'w')
 		f_o.write(str(max_y))
 		print max_y
 		#print self.norm_c
@@ -150,7 +150,7 @@ class Transcript:
 		for key in range(0, len(self.stops_modification)):
 			out = "\t".join([self.idt , str(key + 1) , str(self.stops_modification[key]) ,  str(self.stops_control[key]) , str(0) , str(0) , str(0) , str(0)])
 			file_out.write(out + "\n")
-		f_o = open("www/working_dir/maxy.txt", 'w')
+		f_o = open("www/working_dir/maxy_" + arg.o.split("/")[-1], 'w')
 		f_o.write(str(0))
 class Input:
 	def get_stops(self, bam,idt): # counting stops for each position in transcript
