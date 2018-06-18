@@ -33,38 +33,27 @@ shinyServer(function(input, output, session) {
   #icons to remove from plotly modebar
   list_buttons <- list("autoScale2d" , 'Collaborate', 'toggleSpikelines','lasso2d', 'pan2d', 'sendDataToCloud', 'select2d', 'zoomIn2d', 'zoomOut2d', 'hoverClosestCartesian', 'hoverCompareCartesian')
   
-  observeEvent(input$submit_file_norm, {
-    df <- read.csv(input$file2$datapath,sep = "\t", header = F)
-    state = reactiveValues(choice = unique(df$V1))
-    output$selectID <- renderUI({
-      selectInput("selected", strong(h5("Select transcript ID:")), state$choice  ,selected = 1)
-    })
+  observeEvent(input$submit_norm, {
+    if(!is.null(input$file2)){
+      df <- read.csv(input$file2$datapath,sep = "\t", header = F)
+      download_all(df)
+      state = reactiveValues(choice = unique(df$V1))
+      output$selectID <- renderUI({
+        selectInput("selected", strong(h5("Select transcript ID:")), state$choice  ,selected = 1)
+      })
+    }else{
+      dfp <- as.data.frame(matrix(unlist(strsplit(input$counts, "\n")[[1]])))
+      df <- data.frame(do.call('rbind', strsplit(as.character(dfp$V1),'\t',fixed=TRUE)))
+      state = reactiveValues(choice = unique(df$X1))
+      download_all(df)
+      output$selectID <- renderUI({
+        selectInput("selected", strong(h5("Select transcript ID:")), state$choice  ,selected = 1)
+      })
+    }
     
     observeEvent(input$selected,{
       state$val <- input$selected
       data_selected_1 <- subset(df, df$V1 == state$val)
-      #print(as.numeric(input$ID_col))
-      data_selected <- cbind(data_selected_1[input$ID_col], data_selected_1[input$position_col], data_selected_1[input$control_col], data_selected_1[input$treated_col])
-      #if (sum(data_selected$V3) > 0){
-        res <- rnaPRE_results(data_selected)
-        normalized_all_data <- res[1]
-        table_res <- res[2]
-        draw_plots(normalized_all_data, table_res)
-      #} 
-    })
-  })
-  
-  observeEvent(input$submit_form, {
-    dfp <- as.data.frame(matrix(unlist(strsplit(input$counts, "\n")[[1]])))
-    df <- data.frame(do.call('rbind', strsplit(as.character(dfp$V1),'\t',fixed=TRUE)))
-    state = reactiveValues(choice = unique(df$X1))
-    
-    output$selectID <- renderUI({
-      selectInput("selected", strong(h5("Select transcript ID:")), state$choice  ,selected = 1)
-    })
-    observeEvent(input$selected,{
-      state$val <- input$selected
-      data_selected_1 <- subset(df, df$X1 == state$val)
       #print(as.numeric(input$ID_col))
       data_selected <- cbind(data_selected_1[input$ID_col], data_selected_1[input$position_col], data_selected_1[input$control_col], data_selected_1[input$treated_col])
       #if (sum(data_selected$V3) > 0){
@@ -74,10 +63,9 @@ shinyServer(function(input, output, session) {
       draw_plots(normalized_all_data, table_res)
       #} 
     })
-})
-  
+  }) 
 
-  download_all <- function(){
+  download_all_button <- function(){
     output$download <- downloadHandler(
       filename <- function() {
         paste("aaaa", "csv", sep=".")
@@ -88,10 +76,7 @@ shinyServer(function(input, output, session) {
     )
   }
   
-  observeEvent(input$load_example, {
-    output$done <-renderText(0)
-    df <- read.csv("test_multiple" ,sep = "\t", header = F)[1:30000,]
-      
+  download_all <- function(df){
     #promise for download all data
     d_all <- future({
       write.table(df, "www/working_dir/input_all_rnaPRE", row.names = FALSE, col.names = FALSE, quote = FALSE)
@@ -99,17 +84,23 @@ shinyServer(function(input, output, session) {
       normalized_all_data <- read_delim("www/working_dir/output_all_rnaPRE.txt",
                                         "\t", escape_double = FALSE, col_names = FALSE,  trim_ws = TRUE)
     }) %plan% multiprocess
-      
+    
     observeEvent(input$calculate,{
       disable("calculate")
       while(!resolved(d_all)){
         Sys.sleep(1)
       }
-      download_all()
+      download_all_button()
       output$done <- renderText(1)
-      enable("calculate")
-     })
+    })
+  }
 
+  observeEvent(input$load_example, {
+    output$done <-renderText(0)
+    df <- read.csv("test_multiple" ,sep = "\t", header = F)[1:50000,]
+    
+    download_all(df)
+    
     state = reactiveValues(choice = unique(df$V1))
     output$selectID <- renderUI({
       selectInput("selected", h6(strong("Select transcript ID:")), state$choice, selected = 1)
@@ -118,9 +109,7 @@ shinyServer(function(input, output, session) {
     observeEvent(input$selected,{
       state$val <- input$selected
       data_selected_1 <- subset(df, df$V1 == state$val)
-      #print(as.numeric(input$ID_col))
       data_selected <- cbind(data_selected_1[input$ID_col], data_selected_1[input$position_col], data_selected_1[input$control_col], data_selected_1[input$treated_col])
-      #if (sum(data_selected$V3) > 0){
       res <- rnaPRE_results(data_selected)
       normalized_all_data <- res[1]
       table_res <- res[2]
@@ -128,11 +117,8 @@ shinyServer(function(input, output, session) {
       #}
       
     })
-    
-
   })
 
-  
   observeEvent(input$new_analysis, {
     session$reload()
   })

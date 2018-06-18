@@ -152,6 +152,7 @@ class Transcript:
 			file_out.write(out + "\n")
 		f_o = open("www/working_dir/maxy_" + arg.o.split("/")[-1], 'w')
 		f_o.write(str(0))
+
 class Input:
 	def get_stops(self, bam,idt): # counting stops for each position in transcript
 		reads={}

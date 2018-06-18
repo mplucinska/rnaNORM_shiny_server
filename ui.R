@@ -24,81 +24,93 @@ shinyUI(
       tabPanel("rnaNORM",
                div(class = "container-fluid main-container",
                    # input panel rnaPRE
-                   conditionalPanel(condition = "input.submit_file_norm == '0' && input.submit_form == '0' && input.load_example == '0'",
+                   conditionalPanel(condition = "input.submit_norm == '0' && input.load_example == '0'",
                                     h3(strong("rnaNORM"), class = "text-muted"),
                                     hr(),
-                                    div(class = "text-primary", h6(strong("Choose column number"))),
-                                    fluidRow(
-                                      column(1, numericInput("ID_col", "ID", value = 1)),
-                                      column(1, numericInput("position_col", "position", value = 2)),
-                                      column(1, numericInput("control_col", "control", value = 3)),
-                                      column(1, numericInput("treated_col", "treated", value = 4)),
-                                      column(4,""),
-                                      column(4,"")
-                                    ),
                                     br(),
+                                    splitLayout(
+                                      div(style = "margin: 30px; background-color: #ffffff; border-width: 0px; border-color: #ffffff;",
+                                        fluidRow(
+                                          column(5,
+                                                 h5(strong("Upload input file with counts"))),
+                                          column(1,
+                                                 bsButton("q3", label = "", icon = icon("question"), style = 'primary',
+                                                          size = "extra-small"),
+                                                 bsPopover(id = "q3", title = "Help",
+                                                           content = paste0("Input file format: id    position   count_in_control     count_in_modified"),                                                       
+                                                           placement = "right", 
+                                                           trigger = "hover", 
+                                                           options = list(container = "body")
+                                                 )
+                                          )
+                                        ),
+          
+                                        fileInput("file2", "",
+                                                  multiple = FALSE),
+                                        hr(),
+                                        fluidRow(
+                                          #column(4,""),
+                                          column(4,div(class = "text-primary", h6(strong("Choose column number")))),
+                                          column(4,"")
+                                        ),
+                                        fluidRow(
+                                          #column(4,""),
+                                          column(2, numericInput("ID_col", "ID", value = 1)),
+                                          column(2, numericInput("position_col", "position", value = 2)),
+                                          column(2, numericInput("control_col", "control", value = 3)),
+                                          column(2, numericInput("treated_col", "treated", value = 4)),
+                                          column(4,"")
+                                        )
+                                        #actionButton("submit_file_norm", label = "Submit",  class = "btn-primary"),
+                                       ),
+                                       div(style = "margin: 30px; background-color: #ffffff; border-width: 0px; border-color: #ffffff;",
+                                        fluidRow(
+                                          column(3,
+                                                 h5(strong("or Paste counts"))),
+                                          column(1,
+                                                 bsButton("q4", label = "", icon = icon("question"), style = 'primary',
+                                                          size = "extra-small"),
+                                                 bsPopover(id = "q4", title = "Help",
+                                                           content = paste0("Input format: position   count_in_control     count_in_modified"),                                                       
+                                                           placement = "right", 
+                                                           trigger = "hover", 
+                                                           options = list(container = "body")
+                                                 )
+                                          )
+                                        ),
+                                       
+                                        div(class = "text-primary",
+                                             textAreaInput("counts", "",  placeholder = "id    1    215    315", resize = "vertical", height = "200px")
+                                        ),
+                                        br()
+                                      #actionButton("submit_form", label = "Submit",  class = "btn-primary")
+                                     )
+                                    ),#splitLayout
                                     fluidRow(
-                                      column(11,
-                                             h5(strong("Upload input file with counts"))),
-                                      column(1,
-                                             bsButton("q3", label = "", icon = icon("question"), style = 'primary',
-                                                      size = "extra-small"),
-                                             bsPopover(id = "q3", title = "Help",
-                                                       content = paste0("Input file format: id    position   count_in_control     count_in_modified"),                                                       
-                                                       placement = "right", 
-                                                       trigger = "hover", 
-                                                       options = list(container = "body")
-                                             )
-                                      )
-                                    ),
-      
-                                    fileInput("file2", "",
-                                              multiple = FALSE),
-                                    
-                                    actionButton("submit_file_norm", label = "Submit",  class = "btn-primary"),
-                                    actionButton("load_example", label = "Example",  class = "btn-link"),
-                                    
-                                    hr(),
-                                    fluidRow(
-                                      column(11,
-                                             h5(strong("Paste counts"))),
-                                      column(1,
-                                             bsButton("q4", label = "", icon = icon("question"), style = 'primary',
-                                                      size = "extra-small"),
-                                             bsPopover(id = "q4", title = "Help",
-                                                       content = paste0("Input format: position   count_in_control     count_in_modified"),                                                       
-                                                       placement = "right", 
-                                                       trigger = "hover", 
-                                                       options = list(container = "body")
-                                             )
-                                      )
-                                    ),
-                                   
-                                    div(class = "text-primary",
-                                         textAreaInput("counts", "",  "id    1    215    315", resize = "vertical")
-                                    ),
-                                    br(),
-                                  actionButton("submit_form", label = "Submit",  class = "btn-primary")
+                                      column(5,""),
+                                      column(2,actionButton("submit_norm", label = "Submit",  class = "btn-primary", style = "width: 200px;")),
+                                      column(1,actionButton("load_example", label = "Example",  class = "btn-link")),
+                                      column(3,"")
+                                    )
                    ),
                    
                    #results panel rnaPRE
-                   conditionalPanel(condition = "input.submit_file_norm == '1' || input.submit_form == '1' || input.load_example == '1'",
-                                    span(textOutput("done"),style="color:white"),
+                   conditionalPanel(condition = "input.submit_norm == '1'|| input.load_example == '1'",
                                     fluidRow(
-                                      column(6,h3(strong("rnaNORM"), class = "text-muted")),
-                                      column(4,
-                                             downloadButton("downloadData", "Download results for transcript", style='font-size:90%'),
+                                      column(5,h3(strong("rnaNORM"), class = "text-muted"), span(textOutput("done"),style="color:white")),
+                                      column(2, actionButton( "new_analysis", "New analysis", class="btn-warning")),
+                                      
+                                      column(3,
+                                             downloadButton("downloadData", "Download results for transcript", style='font-size:90%')),
+                                      column(2,
                                              conditionalPanel(condition = "output.done != 1",
-                                                              actionButton("calculate", "Calculate all", style='font-size:90%')
-                                             ), 
+                                                              actionButton("calculate", "Calculate all", style='font-size:90%')),
                                              conditionalPanel(condition = "output.done == 1",
-                                                              downloadButton("download", "Download all", style='font-size:90%'))
-                                             ), 
-                                      column(1, actionButton( "new_analysis", "New analysis", class="btn-warning")),
+                                                              downloadButton("download", "Download all", style='font-size:90%', class="btn-success"))
+                                             ),
                                       column(1, "")
                                     ),
-                                    
-                                    hr(),  
+                                    hr(),
                                     div(class="text-primary",
                                     uiOutput("selectID")),
                                     span(textOutput("maxy"),style="color:white"),
@@ -158,6 +170,7 @@ shinyUI(
                                           column(3, "")
                                           )
                                     ) #conditionsl maxy == 0
+
                    )# results panel rnaPRE end
                )
       ), # tab rnaPRE end
