@@ -55,7 +55,7 @@ shinyUI(
                                         ),
                                         fluidRow(
                                           #column(4,""),
-                                          column(2, numericInput("ID_col", "ID", value = 1)),
+                                          column(2, numericInput("ID_col", "transcript ID", value = 1)),
                                           column(2, numericInput("position_col", "position", value = 2)),
                                           column(2, numericInput("control_col", "control", value = 3)),
                                           column(2, numericInput("treated_col", "treated", value = 4)),
@@ -252,21 +252,22 @@ shinyUI(
       tabPanel("Help",
                div(class = "container-fluid main-container",
                h4(strong("About rnaNORM"), class = "text-muted"),
+               br(),
+               h5(strong("How rnaNORM works?"), class = "text-primary"),
+               hr(),
+               img(src='grafika_rnaNORM_small.png', style="display: block; margin-right: auto; width: 70%; align:left"),
                #hr(),
                #h5("rnaNORM is method reactivity calculation that eliminate read distribution bias and prevent underestimation of reactivity."),
                br(),
                h5(strong("Input format"), class = "text-primary"),
                hr(),
                h5("Input consist of 4 tab delimited columns (default order):"),
-               br(),
                fluidRow(
                  column(1,"id"),
                  column(1, "position"),
                  column(2, "number_of_stops_in_control"),
                  column(2, "number_of_stops_in_modified")
                ),                 
-               br(),
-               h5("User can also specify column order in file."),
                br(),
                h5("example"),
                fluidRow(column(1,"tL(UAA)B1"), column(1,"28"), column(1,"35"), column(1, "13")),
@@ -275,13 +276,18 @@ shinyUI(
                fluidRow(column(1,"tL(UAA)B1"), column(1,"31"), column(1,"96"), column(1, "50")),
                fluidRow(column(1,"tL(UAA)B1"), column(1,"32"), column(1,"99"), column(1, "71")),
                br(),
-               h5(strong("Output"), class ="text-primary"),
-               hr(),
-               h6(),
+               h5("User can also specify column order in file."),
+               h5("Script counting stops from chemical probing experiments is availible on github. Input file is indexed BAM file with reads aligned to transcriptome."),
+               br(),
                h5(strong("Download from github"), class = "text-primary"),
-               hr()
+               hr(),
+               h5("rnaNORM is availble in command-line version on github."),
+               br(),
+               actionButton(inputId='ab1', label="Go to github", 
+                            icon = icon("send"), 
+                            onclick ="window.open('https://github.com/mplucinska/rnaNORM')")
                )
-               ) #end tab Help
+               )#end tab Help
     )# navbarPage end
   )# fluidPage end
 )# UI end

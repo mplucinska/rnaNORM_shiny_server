@@ -65,7 +65,7 @@ class Transcript:
 		f_o = open("www/working_dir/maxy_" + arg.o.split("/")[-1], 'w')
 		f_o.write(str(max_y))
 		print max_y
-		#print self.norm_c
+		print self.norm_c, "norm_c"
 		for i in range(0, self.length):
 			try:
 				self.stops_control_norm.append(self.stops_control[i] * self.norm_c)
