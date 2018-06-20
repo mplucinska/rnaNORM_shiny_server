@@ -3,7 +3,9 @@ library(ggplot2)
 library(ggthemes)  
 library(shiny)
 library(plotly)
-library(DT)
-
-
-
+library(shinyWidgets)
+library(shinyjs)
+library(future)
+plan(multiprocess)
+library(promises)
+library(shinycssloaders)
