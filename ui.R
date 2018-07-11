@@ -119,7 +119,7 @@ shinyUI(
                                       textOutput("maxy2"),
                                       br(),
                                       fluidRow(
-                                        column(11,
+                                        column(4,
                                                h5(strong("Normalized reactivities calculated with rnaNORM"))),
                                         column(1,
                                                bsButton("q1", label = "", icon = icon("question"), style = 'primary',
@@ -140,7 +140,7 @@ shinyUI(
                                       DTOutput('table_results'),
                                       br(),
                                       fluidRow(
-                                        column(11,
+                                        column(4,
                                                h5(strong("Stops correlation before and after normalization"))),
                                         column(1,
                                                bsButton("q2", label = "", icon = icon("question"), style = 'primary',
@@ -252,6 +252,10 @@ shinyUI(
       tabPanel("Help",
                div(class = "container-fluid main-container",
                h4(strong("About rnaNORM"), class = "text-muted"),
+               br(),
+               br(),
+               p("rnaNORM is a method of signal calculation that eliminate read distribution bias and prevent underestimation of reactivity."),
+               p("Check 'How it works?' section for more info. There is also command-line version availible."),
                br(),
                h5(strong("How rnaNORM works?"), class = "text-primary"),
                hr(),
