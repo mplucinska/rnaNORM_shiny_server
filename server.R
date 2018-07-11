@@ -12,7 +12,7 @@ shinyServer(function(input, output, session) {
     output$sequence <- renderText({input$sequence})
     output$str1 <- renderText({input$str1})
     output$str2 <- renderText({input$str2})
-    # #R4RNA view
+    # R4RNA view
     write(">str1", file = "str1.br")
     write(input$str1, file = "str1.br", append = TRUE)
     file <- system.file("extdata", "str1.br", package = "R4RNA")
