@@ -97,7 +97,9 @@ shinyServer(function(input, output, session) {
 
   observeEvent(input$load_example, {
     output$done <-renderText(0)
-    df <- read.csv("test_multiple" ,sep = "\t", header = F)[1:50000,]
+    df <- read.csv("test_multiple" ,sep = "\t", header = F)
+    df <- df[which(df$V1 %in% c('RDN18-1', 'RDN25-1')),]
+    
     
     download_all(df)
     
@@ -139,14 +141,15 @@ shinyServer(function(input, output, session) {
                   content = "Choose another transcript. Not enough positions with stops to calculate reactivity.", append = FALSE, style = 'danger')
     } 
     print(as.numeric(maxy[1,1]))
+    View(normalized_all_data)
     normalized_all_data$X7[normalized_all_data$X8 == "F"] <- 0
     normalized_all_data$colour[normalized_all_data$X7 < 1.2] <- "0.9 - 1.2"
     normalized_all_data$colour[normalized_all_data$X7 < 0.9] <- "0.6 - 0.9"
     normalized_all_data$colour[normalized_all_data$X7 < 0.6] <- "< 0.6"
     normalized_all_data$colour[normalized_all_data$X7 > 1.2] <-  "> 1.2"
-    write.csv(normalized_all_data[,c(1,2,7)], "www/working_dir/output_rnaPRE.csv", row.names = FALSE)
-    table_res <- as.data.frame(cbind(df, normalized_all_data$X6, normalized_all_data$X8))
-    colnames(table_res) <- c("ID", "position", "counts in control", "counts in modified", "reactivity", "passed filter")
+    write.csv(normalized_all_data[,c(1,2,5,7)], "www/working_dir/output_rnaPRE.csv", row.names = FALSE)
+    table_res <- as.data.frame(cbind(df, normalized_all_data$X5 ,normalized_all_data$X6 ,normalized_all_data$X8))
+    colnames(table_res) <- c("ID", "position", "counts in control","counts in modified", "normalized count in control" , "reactivity", "passed filter")
     return(list(normalized_all_data, table_res))
   }
   
