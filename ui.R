@@ -31,8 +31,6 @@ shinyUI(
                                     splitLayout(
                                       div(style = "margin: 30px; background-color: #ffffff; border-width: 0px; border-color: #ffffff;",
                                         fluidRow(
-                                          column(5,
-                                                 h5(strong("Upload input file with counts"))),
                                           column(1,
                                                  bsButton("q3", label = "", icon = icon("question"), style = 'primary',
                                                           size = "extra-small"),
@@ -42,7 +40,9 @@ shinyUI(
                                                            trigger = "hover", 
                                                            options = list(container = "body")
                                                  )
-                                          )
+                                          ),
+                                          column(5,
+                                                 h5(strong("Upload input file with counts")))
                                         ),
           
                                         fileInput("file2", "",
@@ -65,8 +65,6 @@ shinyUI(
                                        ),
                                        div(style = "margin: 30px; background-color: #ffffff; border-width: 0px; border-color: #ffffff;",
                                         fluidRow(
-                                          column(3,
-                                                 h5(strong("or Paste counts"))),
                                           column(1,
                                                  bsButton("q4", label = "", icon = icon("question"), style = 'primary',
                                                           size = "extra-small"),
@@ -76,7 +74,9 @@ shinyUI(
                                                            trigger = "hover", 
                                                            options = list(container = "body")
                                                  )
-                                          )
+                                          ),
+                                          column(3,
+                                                 h5(strong("or Paste counts")))
                                         ),
                                        
                                         div(class = "text-primary",
@@ -126,7 +126,7 @@ shinyUI(
                                                         size = "extra-small"),
                                                bsPopover(id = "q1", title = "Help",
                                                          content = paste0("Barplot shows reactivities for each position in transcript"),
-                                                         placement = "left", 
+                                                         placement = "right", 
                                                          trigger = "hover", 
                                                          options = list(container = "body")
                                                )
@@ -147,7 +147,7 @@ shinyUI(
                                                         size = "extra-small"),
                                                bsPopover(id = "q2", title = "Help",
                                                          content = paste0("Each point refers to number of stops in control and treated sample in particular position "),
-                                                         placement = "left", 
+                                                         placement = "right", 
                                                          trigger = "hover", 
                                                          options = list(container = "body")
                                                )
@@ -260,6 +260,12 @@ shinyUI(
                h5(strong("How rnaNORM works?"), class = "text-primary"),
                hr(),
                img(src='grafika_rnaNORM_small.png', style="display: block; margin-right: auto; width: 70%; align:left"),
+               br(),
+               tags$ol(
+                 tags$li(h5("Read distrinbution is identified by analysis of regression shift towards control sample. First stage of normalization process is calculation of log2 fold change of modified counts with respect to control counts.")), 
+                 tags$li(h5("Distribution of log2 fold changes is used for density function estimation. It enables to calculate value of fold change characteristic for background, which next is used as normalization factor. In background signal after correction, normalized control counts are approximate value of counts in modified sample. Only positions above standard deviation are used for reactivity calculation.")), 
+                 tags$li(h5("Normalized counts are used for reactivity calculation for each position by substraction of normalized control signal from modified. Final profile is scaled with 2/8 normalization (Deigan et al., 2009)."))
+               ),
                #hr(),
                #h5("rnaNORM is method reactivity calculation that eliminate read distribution bias and prevent underestimation of reactivity."),
                br(),
@@ -268,22 +274,31 @@ shinyUI(
                h5("Input consist of 4 tab delimited columns (default order):"),
                fluidRow(
                  column(1,"id"),
-                 column(1, "position"),
-                 column(2, "number_of_stops_in_control"),
+                 column(2, "position"),
+                 column(3, "number_of_stops_in_control"),
                  column(2, "number_of_stops_in_modified")
-               ),                 
-               br(),
-               h5("example"),
-               fluidRow(column(1,"tL(UAA)B1"), column(1,"28"), column(1,"35"), column(1, "13")),
-               fluidRow(column(1,"tL(UAA)B1"), column(1,"29"), column(1,"14"), column(1, "7")),
-               fluidRow(column(1,"tL(UAA)B1"), column(1,"30"), column(1,"15"), column(1, "7")),
-               fluidRow(column(1,"tL(UAA)B1"), column(1,"31"), column(1,"96"), column(1, "50")),
-               fluidRow(column(1,"tL(UAA)B1"), column(1,"32"), column(1,"99"), column(1, "71")),
+               ),
                br(),
                h5("User can also specify column order in file."),
+               h5("It is possible to upload multiple transcripts."),
                h5("Script counting stops from chemical probing experiments is availible on github. Input file is indexed BAM file with reads aligned to transcriptome."),
                br(),
-               h5(strong("Download from github"), class = "text-primary"),
+               h5(strong("Output"), class = "text-primary"),
+               hr(),
+               h5("Transcript of interest can be chosen from drop-down list."),
+               br(),
+               tags$ol(
+                 tags$li(h5("Normalized reactivity for each position in transcript visualized on bar plot.")),
+                 tags$li(h5("Table with input counts, normalized counts, reactivity and information whether reactivity passed filter or not (P - passed, F - FAILED)")),
+                 tags$li(h5("Dot plot representing counts correlation before and after normalization. Each dot on the plot referes to number of counts in control and modified sample in particular position in transcript."))
+               ),
+               br(),
+               h5(strong("Downloading results"), class = "text-primary"),
+               hr(),
+               h5("Button 'Download results for transcript' enables downloading text file with results for selected transcript from the list."),
+               h5("In order to download results for all uploaded transcripts click on 'Calculate all'. It starts calculation for all transcripts. It may take a while. After finishing calculation, button changes to green 'Download all' button."),
+               br(),
+               h5(strong("Download command-line version of rnaNORM from github"), class = "text-primary"),
                hr(),
                h5("rnaNORM is availble in command-line version on github."),
                br(),

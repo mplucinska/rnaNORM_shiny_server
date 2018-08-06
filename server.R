@@ -141,7 +141,6 @@ shinyServer(function(input, output, session) {
                   content = "Choose another transcript. Not enough positions with stops to calculate reactivity.", append = FALSE, style = 'danger')
     } 
     print(as.numeric(maxy[1,1]))
-    View(normalized_all_data)
     normalized_all_data$X7[normalized_all_data$X8 == "F"] <- 0
     normalized_all_data$colour[normalized_all_data$X7 < 1.2] <- "0.9 - 1.2"
     normalized_all_data$colour[normalized_all_data$X7 < 0.9] <- "0.6 - 0.9"
