@@ -182,6 +182,8 @@ class Input:
 		id_tp = ""
 		start = False
 		id_p = ""
+		stops_modification = {}
+		stops_control = {}
 		if arg.i:
 			with open(arg.i) as inp:
 				for i in inp:
@@ -189,10 +191,16 @@ class Input:
 					line = i.split()
 					#print id_p, line[0]
 					if id_p == line[0]:
-						t.stops_modification.append(int(line[3]))
-						t.stops_control.append(int(line[2]))
+						stops_modification[int(line[1])] = float(line[3])
+						stops_control[int(line[1])] = float(line[2])
 						id_p = line[0]
 					elif start == True:
+						if i in stops_modification.keys():
+							t.stops_modification.append(stops_modification[i])
+							t.stops_control.append(stops_control[i])
+						else:
+							t.stops_modification.append(0)
+							t.stops_control.append(0)
 						t.idt = id_p
 						t.length = len(t.stops_control)
 						t.norm_mean()
@@ -208,10 +216,17 @@ class Input:
 					if start == False:
 						t = Transcript()
 						id_p = line[0]
-						t.stops_modification.append(int(line[3]))
-						t.stops_control.append(int(line[2]))
+						stops_modification[int(line[1])] = float(line[3])
+						stops_control[int(line[1])] = float(line[2])
 						start = True
 				try:
+					for i in range(1, max(stops_modification.keys())):
+						if i in stops_modification.keys():
+							t.stops_modification.append(stops_modification[i])
+							t.stops_control.append(stops_control[i])
+						else:
+							t.stops_modification.append(0)
+							t.stops_control.append(0)
 					t.idt = id_p
 					t.length = len(t.stops_control)
 					t.norm_mean()
