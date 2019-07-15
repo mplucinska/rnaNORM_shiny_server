@@ -195,12 +195,13 @@ class Input:
 						stops_control[int(line[1])] = float(line[2])
 						id_p = line[0]
 					elif start == True:
-						if i in stops_modification.keys():
-							t.stops_modification.append(stops_modification[i])
-							t.stops_control.append(stops_control[i])
-						else:
-							t.stops_modification.append(0)
-							t.stops_control.append(0)
+						for i in xrange(1, max(stops_modification.keys())):
+							if i in stops_modification.keys():
+								t.stops_modification.append(stops_modification[i])
+								t.stops_control.append(stops_control[i])
+							else:
+								t.stops_modification.append(0)
+								t.stops_control.append(0)
 						t.idt = id_p
 						t.length = len(t.stops_control)
 						t.norm_mean()
@@ -220,13 +221,14 @@ class Input:
 						stops_control[int(line[1])] = float(line[2])
 						start = True
 				try:
-					for i in range(1, max(stops_modification.keys())):
+					for i in xrange(1, max(stops_modification.keys())):
 						if i in stops_modification.keys():
 							t.stops_modification.append(stops_modification[i])
 							t.stops_control.append(stops_control[i])
 						else:
 							t.stops_modification.append(0)
 							t.stops_control.append(0)
+					print(t.stops_modification)
 					t.idt = id_p
 					t.length = len(t.stops_control)
 					t.norm_mean()

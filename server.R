@@ -9,18 +9,6 @@ shinyServer(function(input, output, session) {
   
   
   observeEvent(input$submit, {
-    output$sequence <- renderText({input$sequence})
-    output$str1 <- renderText({input$str1})
-    output$str2 <- renderText({input$str2})
-    # R4RNA view
-    write(">str1", file = "str1.br")
-    write(input$str1, file = "str1.br", append = TRUE)
-    file <- system.file("extdata", "str1.br", package = "R4RNA")
-    str1 <- readVienna("str1.br")
-    
-    write(">str2", file = "str2.br")
-    write(input$str2, file = "str2.br", append = TRUE)
-    str2 <- readVienna("str2.br")
      
     output$plot_structure <- renderPlot({
       plotDoubleHelix(colourByUnknottedGroups(str1), colourByUnknottedGroups(str2), line = TRUE, arrow = FALSE)
@@ -36,6 +24,9 @@ shinyServer(function(input, output, session) {
   observeEvent(input$submit_norm, {
     if(!is.null(input$file2)){
       df <- read.csv(input$file2$datapath,sep = "\t", header = F)
+      if (ncol(df) == 1){
+        df <- read.csv(input$file2$datapath,sep = " ", header = F)
+      }
       download_all(df)
       state = reactiveValues(choice = unique(df$V1))
       output$selectID <- renderUI({
@@ -44,7 +35,11 @@ shinyServer(function(input, output, session) {
     }else{
       dfp <- as.data.frame(matrix(unlist(strsplit(input$counts, "\n")[[1]])))
       df <- data.frame(do.call('rbind', strsplit(as.character(dfp$V1),'\t',fixed=TRUE)))
-      state = reactiveValues(choice = unique(df$X1))
+      if (ncol(df) == 1){
+        df <- data.frame(do.call('rbind', strsplit(as.character(dfp$V1),' ',fixed=TRUE)))
+      }
+      colnames(df) <- c('V1', 'V2', 'V3', 'V4')
+      state = reactiveValues(choice = unique(df$V1))
       download_all(df)
       output$selectID <- renderUI({
         selectInput("selected", strong(h5("Select transcript ID:")), state$choice  ,selected = 1)
@@ -131,6 +126,7 @@ shinyServer(function(input, output, session) {
     system('python new_normalization.py -i www/working_dir/input_file_rnaPRE -o www/working_dir/output_file_rnaPRE.txt ')
     normalized_all_data <- read_delim("www/working_dir/output_file_rnaPRE.txt",
                                         "\t", escape_double = FALSE, col_names = FALSE,  trim_ws = TRUE)
+    View(normalized_all_data)
     system('rm www/working_dir/output_file_rnaPRE.txt')
     maxy <- read_delim("www/working_dir/maxy_output_file_rnaPRE.txt","\t", escape_double = FALSE, col_names = FALSE,  trim_ws = TRUE)
     output$maxy2 <- renderText(as.numeric(maxy[1,1]))
@@ -147,8 +143,9 @@ shinyServer(function(input, output, session) {
     normalized_all_data$colour[normalized_all_data$X7 < 0.6] <- "< 0.6"
     normalized_all_data$colour[normalized_all_data$X7 > 1.2] <-  "> 1.2"
     write.csv(normalized_all_data[,c(1,2,5,7)], "www/working_dir/output_rnaPRE.csv", row.names = FALSE)
-    table_res <- as.data.frame(cbind(df, normalized_all_data$X5 ,normalized_all_data$X6 ,normalized_all_data$X8))
-    colnames(table_res) <- c("ID", "position", "counts in control","counts in modified", "normalized count in control" , "reactivity", "passed filter")
+    table_res <- as.data.frame(cbind(normalized_all_data$X1, normalized_all_data$X2, normalized_all_data$X3, normalized_all_data$X4, normalized_all_data$X5 ,normalized_all_data$X6 ,normalized_all_data$X8))
+    View(table_res)
+    colnames(table_res) <- c("ID", "position", "counts in modified","counts in control", "normalized count in control" , "reactivity", "passed filter")
     return(list(normalized_all_data, table_res))
   }
   
