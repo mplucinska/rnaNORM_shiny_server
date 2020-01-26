@@ -7,27 +7,17 @@ library(DT)
 
 shinyServer(function(input, output, session) {
   
-  
-  observeEvent(input$submit, {
-     
-    output$plot_structure <- renderPlot({
-      plotDoubleHelix(colourByUnknottedGroups(str1), colourByUnknottedGroups(str2), line = TRUE, arrow = FALSE)
-     })
-     
-     #FORNA view
-     session$sendCustomMessage("mymessage", list( sequence = input$sequence, str1 = input$str1, str2 = input$str2, size = input$char_num))
-    })
-  
   #icons to remove from plotly modebar
   list_buttons <- list("autoScale2d" , 'Collaborate', 'toggleSpikelines','lasso2d', 'pan2d', 'sendDataToCloud', 'select2d', 'zoomIn2d', 'zoomOut2d', 'hoverClosestCartesian', 'hoverCompareCartesian')
   
   observeEvent(input$submit_norm, {
+    sessions_id <- stringi::stri_rand_strings(1, 5)
     if(!is.null(input$file2)){
       df <- read.csv(input$file2$datapath,sep = "\t", header = F)
       if (ncol(df) == 1){
         df <- read.csv(input$file2$datapath,sep = " ", header = F)
       }
-      download_all(df)
+      download_all(df, sessions_id)
       state = reactiveValues(choice = unique(df$V1))
       output$selectID <- renderUI({
         selectInput("selected", strong(h5("Select transcript ID:")), state$choice  ,selected = 1)
@@ -40,7 +30,7 @@ shinyServer(function(input, output, session) {
       }
       colnames(df) <- c('V1', 'V2', 'V3', 'V4')
       state = reactiveValues(choice = unique(df$V1))
-      download_all(df)
+      download_all(df, sessions_id)
       output$selectID <- renderUI({
         selectInput("selected", strong(h5("Select transcript ID:")), state$choice  ,selected = 1)
       })
@@ -60,23 +50,25 @@ shinyServer(function(input, output, session) {
     })
   }) 
 
-  download_all_button <- function(){
+  download_all_button <- function(session_id, output_file_name){
     output$download <- downloadHandler(
       filename <- function() {
-        paste("aaaa", "csv", sep=".")
+        paste("rnaNORM_results", session_id, "csv", sep=".")
       },
       content = function(file){        
-        file.copy("www/working_dir/output_all_rnaPRE.txt", file)
+        file.copy(output_file_name, file)
       }
     )
   }
   
-  download_all <- function(df){
+  download_all <- function(df, session_id){
     #promise for download all data
+    input_file_name <- paste("www/working_dir/input_all_rnaPRE", session_id, sep = "_")
+    output_file_name <-  paste("www/working_dir/output_all_rnaPRE", session_id, sep = "_")
     d_all <- future({
-      write.table(df, "www/working_dir/input_all_rnaPRE", row.names = FALSE, col.names = FALSE, quote = FALSE)
-      system('python new_normalization.py -i www/working_dir/input_all_rnaPRE -o www/working_dir/output_all_rnaPRE.txt ')
-      normalized_all_data <- read_delim("www/working_dir/output_all_rnaPRE.txt",
+      write.table(df, input_file_name, row.names = FALSE, col.names = FALSE, quote = FALSE)
+      system(paste('python new_normalization.py -i', input_file_name, '-o ', output_file_name))
+      normalized_all_data <- read_delim(output_file_name,
                                         "\t", escape_double = FALSE, col_names = FALSE,  trim_ws = TRUE)
     }) %plan% multiprocess
     
@@ -85,18 +77,18 @@ shinyServer(function(input, output, session) {
       while(!resolved(d_all)){
         Sys.sleep(1)
       }
-      download_all_button()
+      download_all_button(session_id, output_file_name)
       output$done <- renderText(1)
     })
   }
 
   observeEvent(input$load_example, {
+    sessions_id <- "example"
     output$done <-renderText(0)
     df <- read.csv("test_multiple" ,sep = "\t", header = F)
     df <- df[which(df$V1 %in% c('RDN18-1', 'RDN25-1')),]
     
-    
-    download_all(df)
+    download_all(df, sessions_id)
     
     state = reactiveValues(choice = unique(df$V1))
     output$selectID <- renderUI({
@@ -120,13 +112,11 @@ shinyServer(function(input, output, session) {
     session$reload()
   })
   
-  
   rnaPRE_results <- function(df){
     write.table(df, "www/working_dir/input_file_rnaPRE", row.names = FALSE, col.names = FALSE, quote = FALSE)
     system('python new_normalization.py -i www/working_dir/input_file_rnaPRE -o www/working_dir/output_file_rnaPRE.txt ')
     normalized_all_data <- read_delim("www/working_dir/output_file_rnaPRE.txt",
                                         "\t", escape_double = FALSE, col_names = FALSE,  trim_ws = TRUE)
-    View(normalized_all_data)
     system('rm www/working_dir/output_file_rnaPRE.txt')
     maxy <- read_delim("www/working_dir/maxy_output_file_rnaPRE.txt","\t", escape_double = FALSE, col_names = FALSE,  trim_ws = TRUE)
     output$maxy2 <- renderText(as.numeric(maxy[1,1]))
