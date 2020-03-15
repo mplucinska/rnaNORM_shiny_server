@@ -187,7 +187,7 @@ shinyUI(
                img(src='grafika_rnaNORM_small.png', style="display: block; margin-right: auto; width: 70%; align:left"),
                br(),
                tags$ol(
-                 tags$li(h5("Read distrinbution is identified by analysis of regression shift towards control sample. First stage of normalization process is calculation of log2 fold change of modified counts with respect to control counts.")), 
+                 tags$li(h5("Read distribution is identified by analysis of regression shift towards control sample. First stage of normalization process is calculation of log2 fold change of modified counts with respect to control counts.")), 
                  tags$li(h5("Distribution of log2 fold changes is used for density function estimation. It enables to calculate value of fold change characteristic for background, which next is used as normalization factor. In background signal after correction, normalized control counts are approximate value of counts in modified sample. Only positions above standard deviation are used for reactivity calculation.")), 
                  tags$li(h5("Normalized counts are used for reactivity calculation for each position by substraction of normalized control signal from modified. Final profile is scaled with 2/8 normalization (Deigan et al., 2009)."))
                ),
