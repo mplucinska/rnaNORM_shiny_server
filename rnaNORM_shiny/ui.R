@@ -21,11 +21,11 @@ shinyUI(
                                  ))),
       
       #tab rnaPRE
-      tabPanel("rnaNORM",
+      tabPanel("probNORM",
                div(class = "container-fluid main-container",
                    # input panel rnaPRE
                    conditionalPanel(condition = "input.submit_norm == '0' && input.load_example == '0'",
-                                    h3(strong("rnaNORM"), class = "text-muted"),
+                                    h3(strong("probNORM"), class = "text-muted"),
                                     hr(),
                                     br(),
                                     splitLayout(
@@ -97,7 +97,7 @@ shinyUI(
                    #results panel rnaPRE
                    conditionalPanel(condition = "input.submit_norm == '1'|| input.load_example == '1'",
                                     fluidRow(
-                                      column(5,h3(strong("rnaNORM"), class = "text-muted"), span(textOutput("done"),style="color:white")),
+                                      column(5,h3(strong("probNORM"), class = "text-muted"), span(textOutput("done"),style="color:white")),
                                       column(2, actionButton( "new_analysis", "New analysis", class="btn-warning")),
                                       
                                       column(3,
@@ -120,7 +120,7 @@ shinyUI(
                                       br(),
                                       fluidRow(
                                         column(4,
-                                               h5(strong("Normalized reactivities calculated with rnaNORM"))),
+                                               h5(strong("Normalized reactivities calculated with probNORM"))),
                                         column(1,
                                                bsButton("q1", label = "", icon = icon("question"), style = 'primary',
                                                         size = "extra-small"),
@@ -176,15 +176,15 @@ shinyUI(
       ),
       tabPanel("Help",
                div(class = "container-fluid main-container",
-               h4(strong("About rnaNORM"), class = "text-muted"),
+               h4(strong("About probNORM"), class = "text-muted"),
                br(),
                br(),
-               p("rnaNORM is a method of signal calculation that eliminate read distribution bias and prevent underestimation of reactivity."),
+               p("probNORM is a method of signal calculation that eliminate read distribution bias and prevent underestimation of reactivity."),
                p("Check 'How it works?' section for more info. There is also command-line version availible."),
                br(),
-               h5(strong("How rnaNORM works?"), class = "text-primary"),
+               h5(strong("How probNORM works?"), class = "text-primary"),
                hr(),
-               img(src='grafika_rnaNORM_small.png', style="display: block; margin-right: auto; width: 70%; align:left"),
+               img(src='grafika_probNORM_small.png', style="display: block; margin-right: auto; width: 70%; align:left"),
                br(),
                tags$ol(
                  tags$li(h5("Read distribution is identified by analysis of regression shift towards control sample. First stage of normalization process is calculation of log2 fold change of modified counts with respect to control counts.")), 
@@ -192,7 +192,7 @@ shinyUI(
                  tags$li(h5("Normalized counts are used for reactivity calculation for each position by substraction of normalized control signal from modified. Final profile is scaled with 2/8 normalization (Deigan et al., 2009)."))
                ),
                #hr(),
-               #h5("rnaNORM is method reactivity calculation that eliminate read distribution bias and prevent underestimation of reactivity."),
+               #h5("probNORM is method reactivity calculation that eliminate read distribution bias and prevent underestimation of reactivity."),
                br(),
                h5(strong("Input format"), class = "text-primary"),
                hr(),
@@ -223,13 +223,13 @@ shinyUI(
                h5("Button 'Download results for transcript' enables downloading text file with results for selected transcript from the list."),
                h5("In order to download results for all uploaded transcripts click on 'Calculate all'. It starts calculation for all transcripts. It may take a while. After finishing calculation, button changes to green 'Download all' button."),
                br(),
-               h5(strong("Download command-line version of rnaNORM from github"), class = "text-primary"),
+               h5(strong("Download command-line version of probNORM from github"), class = "text-primary"),
                hr(),
-               h5("rnaNORM is availble in command-line version on github."),
+               h5("probNORM is availble in command-line version on github."),
                br(),
                actionButton(inputId='ab1', label="Go to github", 
                             icon = icon("send"), 
-                            onclick ="window.open('https://github.com/mplucinska/rnaNORM')")
+                            onclick ="window.open('https://github.com/mplucinska/probNORM')")
                )
                )#end tab Help
     )# navbarPage end
