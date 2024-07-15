@@ -4,8 +4,9 @@ library(shiny)
 library(plotly)
 #library(R4RNA)
 library(DT)
+library(shinyalert)
 
-shinyServer(function(input, output, session) {
+shinyServer(function(input, output, session, shiny.fullstacktrace = TRUE) {
   #icons to remove from plotly modebar
   list_buttons <-
     list(
@@ -33,11 +34,18 @@ shinyServer(function(input, output, session) {
                        sep = " ",
                        header = F)
       }
-      download_all(df, sessions_id)
-      state = reactiveValues(choice = unique(df$V1))
-      output$selectID <- renderUI({
-        selectInput("selected", strong(h5("Select transcript ID:")), state$choice  , selected = 1)
-      })
+      
+      if (ncol(df) != 4){
+        shinyalert("Error", "Incorrect input format. Correct format described in Help section", type = "warning", callbackR = function(x) { session$reload() })
+      } else {
+        download_all(df, sessions_id)
+        state = reactiveValues(choice = unique(df$V1))
+        output$selectID <- renderUI({
+          selectInput("selected", strong(h5("Select transcript ID:")), state$choice  , selected = 1)
+        })
+      }
+      
+
     } else{
       dfp <-
         as.data.frame(matrix(unlist(strsplit(
@@ -52,17 +60,21 @@ shinyServer(function(input, output, session) {
           data.frame(do.call('rbind', strsplit(as.character(dfp$V1), ' ', fixed =
                                                  TRUE)))
       }
-      colnames(df) <- c("V1", 'V2', 'V3', 'V4')
-      state = reactiveValues(choice = unique(df$V1))
-      download_all(df, sessions_id)
-      output$selectID <- renderUI({
-        selectInput("selected", strong(h5("Select transcript ID:")), state$choice  , selected = 1)
-      })
+      
+      if (ncol(df) != 4){
+        shinyalert("Error", "Incorrect input format. Correct format described in Help section", type = "warning", callbackR = function(x) { session$reload() })
+      } else{
+        colnames(df) <- c("V1", 'V2', 'V3', 'V4')
+        state = reactiveValues(choice = unique(df$V1))
+        download_all(df, sessions_id)
+        output$selectID <- renderUI({
+          selectInput("selected", strong(h5("Select transcript ID:")), state$choice  , selected = 1)
+        })
+      }
     }
     
     observeEvent(input$selected, {
       state$val <- input$selected
-      print(state$val)
       data_selected_1 <- subset(df, df$V1 == state$val)
       #print(as.numeric(input$ID_col))
       data_selected <-
@@ -71,7 +83,9 @@ shinyServer(function(input, output, session) {
               data_selected_1[input$control_col],
               data_selected_1[input$treated_col])
       #if (sum(data_selected$V3) > 0){
+      
       res <- rnaPRE_results(data_selected, session_id = sessions_id)
+      
       normalized_all_data <- res[1]
       table_res <- res[2]
       draw_plots(normalized_all_data, table_res, session_id = sessions_id)
@@ -115,22 +129,28 @@ shinyServer(function(input, output, session) {
           output_file_name
         )
       )
-      normalized_all_data <- read_delim(
-        output_file_name,
-        "\t",
-        escape_double = FALSE,
-        col_names = TRUE,
-        trim_ws = TRUE
-      )
       
-      write.table(
-        normalized_all_data,
-        output_file_name,
-        row.names = FALSE,
-        col.names = TRUE,
-        quote = FALSE,
-        sep = "\t"
-      )
+      if(!file.exists(output_file_name)){
+        shinyalert("Error", "Incorrect input format. Correct format described in Help section", type = "warning", callbackR = function(x) { session$reload() })
+      } else {
+        
+        normalized_all_data <- read_delim(
+          output_file_name,
+          "\t",
+          escape_double = FALSE,
+          col_names = TRUE,
+          trim_ws = TRUE
+        )
+        
+        write.table(
+          normalized_all_data,
+          output_file_name,
+          row.names = FALSE,
+          col.names = TRUE,
+          quote = FALSE,
+          sep = "\t"
+        )
+      }
       
     }) %plan% multicore
     
@@ -176,10 +196,10 @@ shinyServer(function(input, output, session) {
   
   rnaPRE_results <- function(df, session_id) {
     input_file_name <-
-      paste("www/working_dir/input_file_rnaPRE", session_id, sep = "_")
+      paste("www/working_dir/input_all_rnaPRE", session_id, sep = "_")
     
     output_file_name <-
-      paste("www/working_dir/output_file_rnaPRE", session_id, sep = "_")
+      paste("www/working_dir/output_all_rnaPRE", session_id, sep = "_")
     
     write.table(
       df,
@@ -190,90 +210,99 @@ shinyServer(function(input, output, session) {
       sep = "\t"
     )
     
-    system(
+    a <- system(
       paste(
         './probnorm counts -i',
         input_file_name,
         '-o ',
         output_file_name
-      )
-    )
+      ),
+      receive.console.signals	=T, intern = T)
     
-    normalized_data <-
-      read_delim(
-        output_file_name,
-        "\t",
-        escape_double = FALSE,
-        col_names = TRUE,
-        trim_ws = TRUE
-      )
-    system(paste('rm ', output_file_name))
-  
-    normalized_data_save <- normalized_data
-    colnames(normalized_data_save) <-
-      c(
-        "transcript_id",
-        "position",
-        "stops_treated",
-        "stops_control",
-        "stops_norm_control",
-        "reactivity",
-        "fold_change",
-        "p_value",
-        "passed_quality_filter"
-      )
+    print(a)
     
-    write.csv(normalized_data_save,
-              output_file_name,
-              row.names = FALSE)
-    
-    normalized_data$X7[normalized_data$passed_quality_filter == "N"] <- 0
-    normalized_data$colour[normalized_data$reactivity < 1.2] <- "0.9 - 1.2"
-    normalized_data$colour[normalized_data$reactivity < 0.9] <- "0.6 - 0.9"
-    normalized_data$colour[normalized_data$reactivity < 0.6] <- "< 0.6"
-    normalized_data$colour[normalized_data$reactivity > 1.2] <- "> 1.2"
-    
-    table_res <-
-      as.data.frame(
-        cbind(
-          normalized_data$transcript_id,
-          normalized_data$position,
-          normalized_data$stops_treated,
-          normalized_data$stops_control,
-          normalized_data$stops_norm_control ,
-          normalized_data$reactivity ,
-          normalized_data$fold_change,
-          normalized_data$p_value,
-          normalized_data$passed_quality_filter
+    not_met_criteria <- unique (grep("The transcripts did not meet the normalization criteria.", a, fixed=TRUE))
+    print(not_met_criteria)
+    if(length(not_met_criteria) > 0){
+      
+      normalized_data <- data.frame(transcript_id=character(),
+                       position=integer(),
+                       stops_treated=integer(),
+                       stops_control=integer(),
+                       stops_norm_control=integer(),
+                       reactivity=integer(),
+                       fold_change=integer(),
+                       p_value=integer(),
+                       passed_quality_filter=character(),
+                       stringsAsFactors=FALSE)
+      
+      shinyalert("Warning", "Transcript did not meet the normalization criteria.", type = "warning")
+      
+    } else {
+      normalized_data <-
+        read_delim(
+          output_file_name,
+          "\t",
+          escape_double = FALSE,
+          col_names = TRUE,
+          trim_ws = TRUE
         )
-      )
-    
-    colnames(table_res) <-
-      c(
-        "transcript_id",
-        "position",
-        "stops_treated",
-        "stops_control",
-        "stops_norm_control",
-        "reactivity",
-        "fold_change",
-        "p_value",
-        "passed_quality_filter"
-      )
-    
-    return(list(normalized_data, table_res))
+      
+      system(paste('rm ', output_file_name))
+    }  
+      write.csv(normalized_data,
+                output_file_name,
+                row.names = FALSE)
+      
+      #normalized_data$X7[normalized_data$passed_quality_filter == "N"] <- 0
+      normalized_data$colour[normalized_data$reactivity < 0.9] <- "0.6 - 0.9"
+      normalized_data$colour[normalized_data$reactivity < 0.6] <- "< 0.6"
+      normalized_data$colour[normalized_data$reactivity > 1.2] <- "> 1.2"
+      
+      table_res <-
+        as.data.frame(
+          cbind(
+            normalized_data$transcript_id,
+            normalized_data$position,
+            normalized_data$stops_treated,
+            normalized_data$stops_control,
+            normalized_data$stops_norm_control ,
+            normalized_data$reactivity ,
+            normalized_data$fold_change,
+            normalized_data$p_value,
+            normalized_data$passed_quality_filter
+          )
+        )
+      
+      colnames(table_res) <-
+        c(
+          "transcript_id",
+          "position",
+          "stops_treated",
+          "stops_control",
+          "stops_norm_control",
+          "reactivity",
+          "fold_change",
+          "p_value",
+          "passed_quality_filter"
+        )
+      
+      
+      return(list(normalized_data, table_res))
+
   }
   
   draw_plots <- function(ndata, table_res, session_id) {
     ndata <- as.data.frame(ndata)
     #download selscted transcript
-    print(unique(ndata$transcript_id))
+    
+    if(nrow(ndata) > 0){
     output$downloadData <- downloadHandler(filename <- function() {
       paste(unique(ndata$X1), "csv", sep = ".")
     },
     content <- function(file) {
       output_file_name <-
-        paste("www/working_dir/output_file_rnaPRE", session_id, sep = "_")
+        paste("www/working_dir/output_all_rnaPRE", session_id, sep = "_")
       file.copy(output_file_name, file)
     })
     
@@ -289,12 +318,17 @@ shinyServer(function(input, output, session) {
                                xaxis = list(title = "")
                              )
     })
-    
+  
     output$plot_scatter2 <- renderPlotly({
+      
+      if (nrow(ndata) > 0){
+        ndata$filter <- "F"
+        ndata$filter[ndata$p_value > 0.05] <- "P"
+
       p <- plot_ly(ndata,
                    x = ~ stops_treated,
                    y = ~ stops_norm_control,
-                   color = ~ passed_quality_filter)
+                   color = ~ filter)
       ggplotly(p) %>% config(displayModeBar = T,
                              modeBarButtonsToRemove = list_buttons) %>% layout(
                                showlegend = FALSE,
@@ -304,6 +338,7 @@ shinyServer(function(input, output, session) {
                                  ndata$stops_norm_control, ndata$stops_treated
                                )))
                              )
+      }
     })
     
     output$plot_histogram <- renderPlotly({
@@ -363,5 +398,9 @@ shinyServer(function(input, output, session) {
               r = 50,
               b = 50,
               t = 50)
+    
+    }
   }
+  traceback()
+  
 })

@@ -23,8 +23,48 @@ shinyUI(
       #tab rnaPRE
       tabPanel("probNORM",
                div(class = "container-fluid main-container",
+                   conditionalPanel(
+                     condition = "input.submit_norm  == '0' && input.start == '0'",
+                     style = "background-image: url(g38710.png); background-size: cover;",
+                     
+                     div(style="height: 200px;"),
+                     
+                     
+                     fluidRow(
+                       column(6, align="center", offset =  3,
+                              h1(strong("probNORM"), class = "text-muted")
+                       )
+                     ),
+                     br(),
+                     br(),
+                     fluidRow(
+                       column(6, align="center", offset =  3,
+                              h3("Welcome in probNORM webserver!")
+                       )
+                     ),
+                     
+                     fluidRow(
+                       column(6, align="center", offset =  3,
+                              h4("Click below to analyze RNA probing data.")
+                       )
+                     ),
+                     
+                     br(),
+                     br(),
+                     fluidRow(
+                       column(6, align="center", offset =  3,
+                              actionButton(
+                                "start",
+                                label = "Start analysis",
+                                class = "btn-success  btn-lg",
+                                style = "width: 200px;"
+                              )
+                       )
+                     ),
+                     div(style="height: 400px;")
+                   ),
                    # input panel rnaPRE
-                   conditionalPanel(condition = "input.submit_norm == '0' && input.load_example == '0'",
+                   conditionalPanel(condition = "input.submit_norm == '0' && input.load_example == '0' && input.start == '1'",
                                     h3(strong("probNORM"), class = "text-muted"),
                                     hr(),
                                     br(),
@@ -95,7 +135,7 @@ shinyUI(
                    ),
                    
                    #results panel rnaPRE
-                   conditionalPanel(condition = "input.submit_norm == '1'|| input.load_example == '1'",
+                   conditionalPanel(condition = "input.start == '1' && input.submit_norm == '1'|| input.load_example == '1'",
                                     fluidRow(
                                       column(5,h3(strong("probNORM"), class = "text-muted"), span(textOutput("done"),style="color:white")),
                                       column(2, actionButton( "new_analysis", "New analysis", class="btn-warning")),
