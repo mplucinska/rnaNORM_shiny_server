@@ -13,19 +13,19 @@ from typing import Dict, List, Tuple
 try:
     import pysam
 except ImportError:
-    sys.stderr.write("ERROR: Module pysam is curently not installed")
+    sys.stdout.write("ERROR: Module pysam is curently not installed")
     sys.exit()
 
 try:
     import numpy as np
 except ImportError:
-    sys.stderr.write("ERROR: Module numpy is curently not installed")
+    sys.stdout.write("ERROR: Module numpy is curently not installed")
     sys.exit()
 
 try:
     from scipy import stats
 except ImportError:
-    sys.stderr.write("ERROR: Module scipy is curently not installed")
+    sys.stdout.write("ERROR: Module scipy is curently not installed")
     sys.exit()
 
 
@@ -145,7 +145,7 @@ class Arguments:
             if 0.0 <= args.pvalue <= 1.0:
                 self.pvalue = args.pvalue
             else:
-                sys.stderr.write("[ERROR] P-value parameter '{}' should be in the range [0-1].\n".format(args.pvalue))
+                sys.stout.write("[ERROR] P-value parameter '{}' should be in the range [0-1].\n".format(args.pvalue))
                 sys.exit()
 
         if args.tr_size != None:
@@ -177,17 +177,17 @@ class Arguments:
     @staticmethod
     def check_bam_file_integrity(bam_input_file):
         if time.ctime(path.getmtime(bam_input_file+".bai")) < time.ctime(path.getmtime(bam_input_file)):
-            sys.stderr.write("[ERROR] The index file is older than the data file: \nUse 'samtools index' to create new index file\n")
+            sys.stout.write("[ERROR] The index file is older than the data file: \nUse 'samtools index' to create new index file\n")
             sys.exit()
             bam_input_file = Arguments.create_bam_index_files(bam_input_file)
             pass
         try:
             pysam.AlignmentFile(bam_input_file, "rb")
         except FileNotFoundError:
-            sys.stderr.write("[ERROR] Could not open alignment file {}: No such file\n".format(bam_input_file))
+            sys.stout.write("[ERROR] Could not open alignment file {}: No such file\n".format(bam_input_file))
             sys.exit()
         except ValueError:
-            sys.stderr.write("[ERROR] Could not parse alignment file {}: Check if the file is correct\n".format(bam_input_file))
+            sys.stout.write("[ERROR] Could not parse alignment file {}: Check if the file is correct\n".format(bam_input_file))
             sys.exit()
         return bam_input_file
 
@@ -196,7 +196,7 @@ class Arguments:
         try:
             pysam.quickcheck(bam_file)
         except pysam.utils.SamtoolsError:
-            sys.stderr.write("[ERROR] File '{}' was not identified as sequence data or is truncated.\n".format(bam_file))
+            sys.stout.write("[ERROR] File '{}' was not identified as sequence data or is truncated.\n".format(bam_file))
             sys.exit()
 
     def check_bam_file(self, control_file, treated_file):
@@ -233,7 +233,7 @@ class Arguments:
         if path.exists(counts_file):
             return counts_file
         else:
-            sys.stderr.write("[ERROR] Could not open counts file {}: No such file or directory\n".format(counts_file))
+            sys.stout.write("[ERROR] Could not open counts file {}: No such file or directory\n".format(counts_file))
             sys.exit()
 
 
@@ -598,19 +598,19 @@ class Input:
         control_ids = self.get_ids(cfile)
         treated_ids = self.get_ids(tfile)
         if control_ids != treated_ids:
-            sys.stderr.write("[ERROR] Provided BAM files do not match. Make sure BAM files are correct.\n")
+            sys.stout.write("[ERROR] Provided BAM files do not match. Make sure BAM files are correct.\n")
             sys.exit()
         if not control_ids and arg.ids:
-            sys.stderr.write("[ERROR] No selected transcripts found: {}\n        Make sure the names are correct and separated by a comma.\n".format(",".join(arg.ids)))
+            sys.stout.write("[ERROR] No selected transcripts found: {}\n        Make sure the names are correct and separated by a comma.\n".format(",".join(arg.ids)))
             sys.exit()
         elif arg.ids and len(control_ids) != len(arg.ids):
             missing = list(set(arg.ids) - set(control_ids.keys()))
             if len(missing) == 1:
-                sys.stderr.write("[WARNING] Transcript '{}' was not found in BAM files. Make sure the names are correct and separated by a comma.\n".format(",".join(missing)))
+                sys.stdout.write("[WARNING] Transcript '{}' was not found in BAM files. Make sure the names are correct and separated by a comma.\n".format(",".join(missing)))
             else:
-                sys.stderr.write("[WARNING] Transcripts '{}' were not found in BAM files. Make sure the names are correct and separated by a comma.\n".format(",".join(missing)))
+                sys.stdout.write("[WARNING] Transcripts '{}' were not found in BAM files. Make sure the names are correct and separated by a comma.\n".format(",".join(missing)))
         elif not control_ids:
-            sys.stderr.write("[ERROR] Could not find any transcripts. Make sure BAM files are correct.\n")
+            sys.stdout.write("[ERROR] Could not find any transcripts. Make sure BAM files are correct.\n")
             sys.exit()
         return  control_ids
 
@@ -652,16 +652,16 @@ class Input:
             position = float(line[1])
         except ValueError:
             Spinner.remove_spinner_leftovers()
-            sys.stderr.write("[ERROR] Position must be an integer. Please check the input format. Line: '{}', value: '{}'\n".format(line_nmbr, line[1]))
+            sys.stout.write("[ERROR] Position must be an integer. Please check the input format. Line: '{}', value: '{}'\n".format(line_nmbr, line[1]))
             sys.exit()
         if position.is_integer():
             if int(position) in stops_treated or int(position) in stops_control:
                 Spinner.remove_spinner_leftovers()
-                sys.stderr.write("[ERROR] Positions in '{}' transcript are duplicated. Position: '{}'\n".format(line[0], position))
+                sys.stout.write("[ERROR] Positions in '{}' transcript are duplicated. Position: '{}'\n".format(line[0], position))
                 sys.exit()
         else:
             Spinner.remove_spinner_leftovers()
-            sys.stderr.write("[ERROR] Position must be an integer. Please check the input format. Line: '{}', value: '{}'\n".format(line_nmbr, position))
+            sys.stout.write("[ERROR] Position must be an integer. Please check the input format. Line: '{}', value: '{}'\n".format(line_nmbr, position))
             sys.exit()
         return position
 
@@ -684,13 +684,13 @@ class Input:
             stops_treated[int(position)] = float(line[3])
         except ValueError:
             Spinner.remove_spinner_leftovers()
-            sys.stderr.write("[ERROR] Illegal character in a treated column. Please check the input format. Line: '{}', value: '{}'\n".format(line_nmbr, line[3]))
+            sys.stout.write("[ERROR] Illegal character in a treated column. Please check the input format. Line: '{}', value: '{}'\n".format(line_nmbr, line[3]))
             sys.exit()
         try:
             stops_control[int(position)] = float(line[2])
         except ValueError:
             Spinner.remove_spinner_leftovers()
-            sys.stderr.write("[ERROR] Illegal character in a control column. Please check the input format. Line: '{}', value: '{}'\n".format(line_nmbr, line[2]))
+            sys.stout.write("[ERROR] Illegal character in a control column. Please check the input format. Line: '{}', value: '{}'\n".format(line_nmbr, line[2]))
             sys.exit()
         return stops_treated, stops_control
 
@@ -704,7 +704,7 @@ class Input:
         """
         if len(line) < 4:
             Spinner.remove_spinner_leftovers()
-            sys.stderr.write("[ERROR] Insufficient number of columns in '{}'. Line: '{}', columns: '{}', required: 4.\n        Check the input file format in <man file>\n".format(arg.counts, line_nmbr, len(line)))
+            sys.stout.write("[ERROR] Insufficient number of columns in '{}'. Line: '{}', columns: '{}', required: 4.\n        Check the input file format in <man file>\n".format(arg.counts, line_nmbr, len(line)))
             sys.exit()
 
     def check_counts_points_limit(self, stops):
@@ -761,7 +761,7 @@ class Input:
                             omitted_transcripts += self.run_counts_normalization(stops_treated, stops_control, transcript_id)
                         else:
                             Spinner.remove_spinner_leftovers()
-                            #sys.stderr.write("[WARNING] Transcript '{}' has less than 20 positions ({}). Transcript was discarded from further normalization.\n".format(transcript_id, len(stops_control)))
+                            #sys.stout.write("[WARNING] Transcript '{}' has less than 20 positions ({}). Transcript was discarded from further normalization.\n".format(transcript_id, len(stops_control)))
                             omitted_transcripts += 1
                         transcript_id = tab[0]
                         trans_ids.append(transcript_id)
@@ -772,7 +772,7 @@ class Input:
                     omitted_transcripts += self.run_counts_normalization(stops_treated, stops_control, transcript_id)
                 else:
                     Spinner.remove_spinner_leftovers()
-                    #sys.stderr.write("[WARNING] Transcript '{}' has less than 20 positions ({}). Transcript was discarded from further normalization.\n".format(transcript_id, len(stops_control)))
+                    #sys.stout.write("[WARNING] Transcript '{}' has less than 20 positions ({}). Transcript was discarded from further normalization.\n".format(transcript_id, len(stops_control)))
                     omitted_transcripts += 1
             if omitted_transcripts < trans_in_file:
                 if trans_in_file != 1:
@@ -785,7 +785,7 @@ class Input:
                     #sys.stdout.write("[INFO] {} transcript, from initial {}, met the normalization criteria.\n      Results are in the file: {}\n".format(trans_in_file - omitted_transcripts, trans_in_file, arg.output))
             else:
                 Spinner.remove_spinner_leftovers()
-                sys.stderr.write("[WARNING] The transcripts did not meet the normalization criteria.\n          The resulting file was not created\n")
+                sys.stdout.write("[WARNING] The transcripts did not meet the normalization criteria.\n          The resulting file was not created\n")
 
     def bam_input_parser(self):
         """
@@ -814,7 +814,7 @@ class Input:
                 #sys.stdout.write("[INFO] {} transcript, from initial {}, met the normalization criteria.\nResults are in the file: {}\n".format(len(trans_ids) - omitted, len(trans_ids), arg.output))
         else:
             Spinner.remove_spinner_leftovers()
-            sys.stderr.write("WARNING! The transcripts did not meet the normalization criteria.\nThe resulting file was not created\n")
+            sys.stout.write("WARNING! The transcripts did not meet the normalization criteria.\nThe resulting file was not created\n")
 
     def write_count_file(self, T):
         count_name = "".join(arg.control.split(".")[:-1])+"_counts.txt"
